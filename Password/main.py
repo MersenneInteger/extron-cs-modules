@@ -7,20 +7,13 @@ from extronlib.interface import (ContactInterface, DigitalIOInterface,
     VolumeInterface)
 from extronlib.ui import Button, Knob, Label, Level
 from extronlib.system import Clock, MESet, Wait
+from password import Password
 
 print(Version())
-
 ## End ControlScript Import ----------------------------------------------------
-##
-## Begin User Import -----------------------------------------------------------
-
-## End User Import -------------------------------------------------------------
-##
 ## Begin Device/Processor Definition -------------------------------------------
-
 IPCPPro555 = ProcessorDevice('IPCPPro555')
-TLPPro520M = UIDevice('TLPPro520M')
-
+TLPPro520M = UIDevice('TLPPro1022M')
 ## End Device/Processor Definition ---------------------------------------------
 ##
 ## Begin Device/User Interface Definition --------------------------------------
@@ -39,15 +32,11 @@ passcodeClearBtn = Button(TLPPro520M, 611)
 passCodeLabel = Label(TLPPro520M, 65000)
 kpList = [kp0, kp1, kp2, kp3, kp4, kp5, kp6, kp7, kp8, kp9]
 
-mainPassword = Password('8080', 4, kpList, True, passCodeLabel)
-
-## End Device/User Interface Definition ----------------------------------------
-##
-## Begin Communication Interface Definition ------------------------------------
-
-## End Communication Interface Definition --------------------------------------
+mainPassword = Password('8080', kpList, 4, True, passCodeLabel)
 
 ## Event Definitions -----------------------------------------------------------
+def Initialize():
+    pass
 
 @event(kpList, 'Pressed')
 def kpBtnEvent(button, state):
@@ -62,7 +51,10 @@ def passcodeClearBtnEvent(button, state):
 @event(passcodeEnterBtn, 'Pressed')
 def passcodeEnterBtnEvent(button, state):
 
-    mainPassword.enterPassword()
+    if mainPassword.enterPassword():
+        passCodeLabel.SetText('Correct')
+    else:
+        passCodeLabel.SetText('Incorrect')
         
 ## End Events Definitions-------------------------------------------------------
 

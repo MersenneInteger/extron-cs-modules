@@ -4,7 +4,7 @@ from extronlib.ui import Button, Label
 
 class Password:
           
-    def __init__(self, password, passwordLimit=4, kpList, useStarText=False, passwordLabel=None):
+    def __init__(self, password, kpList, passwordLimit=4, useStarText=False, passwordLabel=None):
     
         self._password = password
         self._passwordLimit = passwordLimit
@@ -17,41 +17,38 @@ class Password:
         self.starText = ''
         self.passwordLabel = passwordLabel
         
-    def buildPassword(digitBtn):
+    def buildPassword(self, digitBtn):
     
         if len(self.enteredPassword) < self._passwordLimit:
-            self.enteredPassword += kpMap[digitBtn]
-            if useStarText:
-                buildStarText()
+            self.enteredPassword += self.kpMap[digitBtn]
+            if self.useStarText:
+                self.starText += '*'
+                self.passwordLabel.SetText(self.starText)
             else:
                 self.passwordLabel.SetText(self.enteredPassword)
                 
-    @classmethod
-    def buildStarText(cls):
-
-        self.starText += '*'
-    
-    def enterPassword():
+    def enterPassword(self):
         
-        if useStarText:
+        entered, passwd = self.enteredPassword, self._password
+        if self.useStarText:
             self.starText = ''
         self.passwordLabel.SetText('')
-        self._password = ''
         self.enteredPassword = ''
-        if self.enteredPassword != self._password:
+        if entered != passwd:
             return False
-       return True
+        return True
     
-    def clearPassword():
+    def clearPassword(self):
     
         self.enteredPassword = ''
+        self.passwordLabel.SetText(self.enteredPassword)
 
-    def backspace():
+    def backspace(self):
     
         if len(self.enteredPassword) != 0:
             self.enteredPassword = self.enteredPassword[:len(self.enteredPassword)-1]
-            if useStarText:
+            if self.useStarText:
                 self.starText = self.starText[:len(self.starText)-1]
                 self.passwordLabel.SetText(self.starText)
-           self.passwordLabel.SetText(self.enteredPassword)
+            self.passwordLabel.SetText(self.enteredPassword)
                  
