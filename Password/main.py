@@ -28,11 +28,11 @@ kp7 = Button(TLPPro520M, 607)
 kp8 = Button(TLPPro520M, 608)
 kp9 = Button(TLPPro520M, 609)
 passcodeEnterBtn = Button(TLPPro520M, 610)
-passcodeClearBtn = Button(TLPPro520M, 611)
+passcodeClearBtn = Button(TLPPro520M, 611, repeatTime = 1)
 passCodeLabel = Label(TLPPro520M, 65000)
 kpList = [kp0, kp1, kp2, kp3, kp4, kp5, kp6, kp7, kp8, kp9]
 
-mainPassword = Password('8080', kpList, 4, True, passCodeLabel)
+mainPassword = Password('8080', kpList, '1234', 4, True, passCodeLabel)
 
 ## Event Definitions -----------------------------------------------------------
 def Initialize():
@@ -43,16 +43,22 @@ def kpBtnEvent(button, state):
     
     mainPassword.buildPassword(button)
 
-@event(passcodeClearBtn, 'Pressed')
+@event(passcodeClearBtn, ['Pressed', 'Repeated'])
 def passcodeClearBtnEvent(button, state):
     
-    mainPassword.clearPassword()
+    if state == 'Pressed':
+        mainPassword.backspace()
+    elif state == 'Repeated':
+        mainPassword.clearPassword()
 
 @event(passcodeEnterBtn, 'Pressed')
 def passcodeEnterBtnEvent(button, state):
 
-    if mainPassword.enterPassword():
+    passwordValidate = mainPassword.enterPassword()
+    if passwordValidate == 1:
         passCodeLabel.SetText('Correct')
+    elif passwordValidate == 2:
+        passCodeLabel.SetText('Admin Password Correct')
     else:
         passCodeLabel.SetText('Incorrect')
         
