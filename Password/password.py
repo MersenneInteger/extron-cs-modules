@@ -42,15 +42,9 @@ class Password:
         self.passwordLabel.SetText('')
         self.enteredPassword = ''
 
-        if entered != passwd and entered != adminPasswd:
-            print('password incorrect')
-            return False
-        elif entered == passwd:
-            print('password correct')
-            return 1
-        elif entered == adminPasswd:
-            print('admin password correct')
-            return 2
+        if entered != passwd and entered != adminPasswd: return False
+        elif entered == passwd: return 1
+        elif entered == adminPasswd: return 2
     
     def clearPassword(self):
     
