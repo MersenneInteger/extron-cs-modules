@@ -1,2 +1,1 @@
-# gsModules
-Global Scripter Modules
+extron control script practice projects
