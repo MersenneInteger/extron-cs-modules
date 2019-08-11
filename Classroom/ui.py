@@ -5,12 +5,10 @@ from extronlib.interface import *
 from extronlib.ui import Button, Knob, Label, Level, Slider
 from extronlib.system import Clock, MESet, Timer, Wait
 
-print(Version())
-
 ## End ControlScript Import ----------------------------------------------------
 ##
 ## Begin User Import -----------------------------------------------------------
-from main import TLP_1022
+
 ## End User Import -------------------------------------------------------------
 ##f
 ## Begin Device/Processor Definition -------------------------------------------
@@ -18,6 +16,10 @@ from main import TLP_1022
 ## End Device/Processor Definition ---------------------------------------------
 ##
 ## Begin Device/User Interface Definition --------------------------------------
+
+TLP_1022 = UIDevice('TLP_1022_TP')
+
+##definitions
 startBtn = Button(TLP_1022, 8000)
 
 splashLightingControlBtn = Button(TLP_1022, 8230)
@@ -95,6 +97,128 @@ afvLevel = Level(TLP_1022, 8023)
 mic1Level = Level(TLP_1022, 9018)
 mic2Level = Level(TLP_1022, 9022)
 
+
+#button events
+buttonEventList = ['Pressed', 'Released', 'Held', 'Repeated', 'Tapped']
+
+##btn lists and dictionaries
+#sources
+sourceList = [
+    sourceLaptopBtn,
+    sourcePCBtn,
+    sourceBlurayBtn,
+    sourceSmdBtn,
+    sourceAuxBtn
+]
+
+sourcesGroup = MESet(sourceList)
+
+sourcesMap = {
+    sourceLaptopBtn: 'Laptop',
+    sourcePCBtn: 'PC',
+    sourceBlurayBtn: 'Blu-ray',
+    sourceSmdBtn: 'SMD 202',
+    sourceAuxBtn: 'AUX'
+}
+
+##device btns
+#bluray btns
+blurayBtns = [
+    blurayYellowBtn,
+    blurayGreenBtn,
+    blurayRedBtn,
+    blurayBlueBtn,
+    blurayPlayBtn,
+    blurayStopBtn,
+    blurayPauseBtn,
+    blurayFastForwardBtn,
+    blurayRewindBtn,
+    blurayNextBtn,
+    blurayPreviousBtn,
+    blurayUpBtn,
+    blurayDownBtn,
+    blurayLeftBtn,
+    blurayRightBtn,
+    blurayEnterBtn,
+    blurayMenuBtn,
+    blurayTitleBtn
+]
+
+blurayCmdMap = {
+    blurayYellowBtn: 'YELLOW',
+    blurayGreenBtn: 'GREEN',
+    blurayRedBtn: 'RED',
+    blurayBlueBtn: 'BLUE',
+    blurayPlayBtn: 'PLAY',
+    blurayStopBtn: 'STOP',
+    blurayPauseBtn: 'PAUSE',
+    blurayFastForwardBtn: 'FFWD',
+    blurayRewindBtn: 'REW',
+    blurayNextBtn: 'FSTEP',
+    blurayPreviousBtn: 'RSTEP',
+    blurayUpBtn: 'UP',
+    blurayDownBtn: 'DOWN',
+    blurayLeftBtn: 'LEFT',
+    blurayRightBtn: 'RIGHT',
+    blurayEnterBtn: 'ENTER',
+    blurayMenuBtn: 'MENU',
+    blurayTitleBtn: 'TOP_MENU'
+}
+
+#lighting btns
+lightingBtns = [
+    lightingPreset1Btn,
+    lightingPreset2Btn,
+    lightingPreset3Btn,
+    lightingPreset4Btn
+]
+
+lightingCmdMap = {
+    lightingPreset1Btn: 'PRST01\r',
+    lightingPreset2Btn: 'PRST02\r',
+    lightingPreset3Btn: 'PRST03\r',
+    lightingPreset4Btn: 'PRST04\r'
+}
+
+#SMD202 btns
+smd202Btns = [
+    smdPlayBtn,
+    smdHDMIBtn,
+    smdDecoderBtn,
+    smdPauseBtn,
+    smdStopBtn
+]
+
+smd202CmdMap = {
+    smdPlayBtn: 'wS1*1PLYR\r',
+    smdHDMIBtn: '2!',
+    smdDecoderBtn: '1!',
+    smdPauseBtn: 'wE1PLYR\r',
+    smdStopBtn: 'wO1PLYR\r'
+}
+
+##volume btns
+
+#afv btns
+afvBtns = [
+    afvVolMuteBtn,
+    afvVolUpBtn,
+    afvVolDownBtn
+]
+
+#mic 1 btns
+mic1Btns = [
+    mic1VolUpBtn,
+    mic1VolDownBtn,
+    mic1VolMuteBtn
+]
+
+#mic 2 btns
+mic2Btns = [
+    mic2VolUpBtn,
+    mic2VolDownBtn,
+    mic2VolMuteBtn
+]
 
 ## End Device/User Interface Definition ----------------------------------------
 ##
