@@ -21,19 +21,38 @@ TLP_1022 = UIDevice('TLP_1022_TP')
 
 ##definitions
 startBtn = Button(TLP_1022, 8000)
-
-splashLightingControlBtn = Button(TLP_1022, 8230)
-splashAudioControlBtn = Button(TLP_1022, 8260)
+systemOffBtn = Button(TLP_1022, 8022)
+confirmShutdownBtn = Button(TLP_1022, 9028)
+closeShutdownPopupBtn = Button(TLP_1022, 9029)
 logoText = Label(TLP_1022, 7001)
 roomText = Label(TLP_1022, 10000)
-audioControlBtn = Button(TLP_1022, 8020)
-systemOffBtn = Button(TLP_1022, 8022)
-lightingControlBtn = Button(TLP_1022, 8116)
-helpBtn = Button(TLP_1022, 8117)
-closeHelpPopup = Button(TLP_1022, 9057)
-confirmShutdownBtn = Button(TLP_1022, 9028)
-closeShutdownPopup = Button(TLP_1022, 9029)
 
+#popups
+audioControlBtn = Button(TLP_1022, 8020)
+closeAudioControlPopupBtn = Button(TLP_1022, 9027)
+audioControlPopupBtns = [audioControlBtn, closeAudioControlPopupBtn]
+
+lightingControlBtn = Button(TLP_1022, 8116)
+closeLightingControlPopupBtn = Button(TLP_1022, 8238)
+lightingControlPopupBtns = [lightingControlBtn, closeLightingControlPopupBtn]
+
+helpBtn = Button(TLP_1022, 8117)
+closeHelpPopupBtn = Button(TLP_1022, 9057)
+helpPopupBtns = [helpBtn, closeHelpPopupBtn]
+
+screenControlBtn = Button(TLP_1022, 8115)
+closeScreenControlPopupBtn = Button(TLP_1022, 8253)
+screenControlPopupBtns = [screenControlBtn, closeScreenControlPopupBtn]
+
+splashLightingControlBtn = Button(TLP_1022, 8230)
+closeLightingControlStartPopupBtn = Button(TLP_1022, 8237)
+startLightingControlPopupBtns = [splashLightingControlBtn, closeLightingControlStartPopupBtn]
+
+splashAudioControlBtn = Button(TLP_1022, 8260)
+closeStartAudioControlPopupBtn = Button(TLP_1022, 8272)
+startAudioControlPopupBtns = [splashAudioControlBtn, closeStartAudioControlPopupBtn]
+
+#sources
 sourceLaptopBtn = Button(TLP_1022, 8050)
 sourcePCBtn = Button(TLP_1022, 8052)
 sourceBlurayBtn = Button(TLP_1022, 8054)
@@ -42,7 +61,6 @@ sourceAuxBtn = Button(TLP_1022, 8062)
 displayOnBtn = Button(TLP_1022, 8112)
 displayOffBtn = Button(TLP_1022, 8113)
 displayMuteBtn = Button(TLP_1022, 8114)
-screenControlBtn = Button(TLP_1022, 8115)
 
 blurayYellowBtn = Button(TLP_1022, 20)
 blurayGreenBtn = Button(TLP_1022, 21)
@@ -66,14 +84,11 @@ blurayTitleBtn = Button(TLP_1022, 5013)
 screenUpBtn = Button(TLP_1022, 8241)
 screenDownBtn = Button(TLP_1022, 8242)
 screenStopBtn = Button(TLP_1022, 8243)
-closeScreenControlPopup = Button(TLP_1022, 8253)
 
 lightingPreset1Btn = Button(TLP_1022, 8231)
 lightingPreset2Btn = Button(TLP_1022, 8232)
 lightingPreset3Btn = Button(TLP_1022, 8233)
 lightingPreset4Btn = Button(TLP_1022, 8234)
-closeLightingControlPopup = Button(TLP_1022, 8238)
-closeLightingControlStartPopup = Button(TLP_1022, 8237)
 
 smdPlayBtn = Button(TLP_1022, 2)
 smdHDMIBtn = Button(TLP_1022, 3)
@@ -92,11 +107,9 @@ mic1VolMuteBtn = Button(TLP_1022, 9017)
 mic2VolUpBtn = Button(TLP_1022, 9019)
 mic2VolDownBtn = Button(TLP_1022, 9020)
 mic2VolMuteBtn = Button(TLP_1022, 9021)
-closeAudioControlPopup = Button(TLP_1022, 9027)
 afvLevel = Level(TLP_1022, 8023)
 mic1Level = Level(TLP_1022, 9018)
 mic2Level = Level(TLP_1022, 9022)
-
 
 #button events
 buttonEventList = ['Pressed', 'Released', 'Held', 'Repeated', 'Tapped']
@@ -122,6 +135,18 @@ sourcesMap = {
 }
 
 ##device btns
+
+#display btns
+displayBtns = [
+    displayOnBtn,
+    displayOffBtn,
+    displayMuteBtn
+]
+
+displayGroup = MESet(displayBtns)
+
+videoIsMuted = False
+
 #bluray btns
 blurayBtns = [
     blurayYellowBtn,

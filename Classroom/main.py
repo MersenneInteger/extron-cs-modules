@@ -14,15 +14,12 @@ import devices
 ## End User Import -------------------------------------------------------------
 ##
 ## Begin Device/Processor Definition -------------------------------------------
-
 ## End Device/Processor Definition ---------------------------------------------
 ##
 ## Begin Device/User Interface Definition --------------------------------------
-
 ## End Device/User Interface Definition ----------------------------------------
 ##
 ## Begin Communication Interface Definition ------------------------------------
-
 ## End Communication Interface Definition --------------------------------------
 
 def Initialize():
@@ -45,7 +42,8 @@ def Initialize():
             ui.TLP_1022.Hostname,
             ui.TLP_1022.IPAddress)
         
-    #TLP_1022.SetWakeOnMotion('On')
+    ui.TLP_1022.SetWakeOnMotion('On')
+    print('initialized...')
     
     
 def powerOnDisplay():
@@ -108,108 +106,103 @@ def startBtnEvent(button, state):
     ui.TLP_1022.ShowPage('Main')
 
 
-@event(ui.splashLightingControlBtn, 'Pressed')
-def startLightingControlBtnEvent(button, state):
-    ui.TLP_1022.ShowPopup('Start Lighting Control')   
-  
-
-@event(ui.closeLightingControlStartPopupBtn, 'Pressed')
-def closeLightingControlStartPopupBtnEvent(button, state):
-    ui.TLP_1022.HidePopup('Start Lighting Control')
-    
-    
-@event(ui.splashAudioControlBtn, 'Pressed')
-def splashAudioControlBtnEvent(button, state):
-    ui.TLP_1022.ShowPopup('Start Audio Control') 
-    
-    
-@event(ui.closeStartAudioControlPopupBtn, 'Pressed')
-def closeStartAudioControlPopupBtnEvent(button, state):
-    ui.TLP_1022.HidePopup('Start Audio Control')
-
-
 @event(ui.systemOffBtn, 'Pressed')
 def systemOffBtnEvent(button, state):
     ui.TLP_1022.ShowPopup('Confirmation')
-    
+
 
 @event(ui.confirmShutdownBtn, 'Pressed')
 def confirmShutdownBtnEvent(button, state):
     confirmShutdown()
-    
+
 
 @event(ui.closeShutdownPopupBtn, 'Pressed')
 def closeShutdownPopupEvent(button, state):
     ui.TLP_1022.HidePopup('Confirmation')
-    
-    
-@event(ui.audioControlBtn, 'Pressed')
-def audioControlBtnEvent(button, state):
-    ui.TLP_1022.ShowPopup('Audio Control')
-    
-
-@event(ui.closeAudioControlPopupBtn, 'Pressed')
-def closeAudioControlPopupBtnEvent(button, state):
-    ui.TLP_1022.HidePopup('Audio Control')
 
 
-@event(ui.lightingControlBtn, 'Pressed')
-def lightingControlBtnEvent(button, state):
-    pass
- 
- 
-@event(ui.closeLightingControlPopupBtn, 'Pressed')
-def closeLightingControlPopupBtnEvent(button, state):
-    pass
+@event(ui.startLightingControlPopupBtns, 'Pressed')
+def startLightingControlPopupBtnEvent(button, state):
+    if button == ui.splashLightingControlBtn:
+        ui.TLP_1022.ShowPopup('Start Lighting Control')
+    elif button == ui.closeLightingControlStartPopupBtn:
+        ui.TLP_1022.HidePopup('Start Lighting Control')
 
 
-@event(ui.helpBtn, 'Pressed')
-def helpBtnEvent(button, state):
-    pass
-    
-    
-@event(ui.closeHelpPopupBtn, 'Pressed')
-def closeHelpPopupEvent(button, state):
-    pass
-    
-
-@event(ui.screenControlBtn, 'Pressed')
-def screenControlBtnEvent(button, state):
-    pass
+@event(ui.startAudioControlPopupBtns, 'Pressed')
+def startAudioControlPopupBtnEvent(button, state):
+    if button == ui.splashAudioControlBtn:
+        ui.TLP_1022.ShowPopup('Start Audio Control')
+    elif button == ui.closeStartAudioControlPopupBtn:
+        ui.TLP_1022.HidePopup('Start Audio Control')
 
 
-@event(ui.closeScreenControlPopupBtn, 'Pressed')
-def closeScreenControlPopupBtnEvent(button, state):
-    pass
+@event(ui.audioControlPopupBtns, 'Pressed')
+def audioControlPopupBtnEvent(button, state):
+    if button == ui.audioControlBtn:
+        ui.TLP_1022.ShowPopup('Audio Control')
+    elif button == ui.closeAudioControlPopupBtn:
+        ui.TLP_1022.HidePopup('Audio Control')
+
+
+@event(ui.lightingControlPopupBtns, 'Pressed')
+def lightingControlPopupBtnEvent(button, state):
+    if button == ui.lightingControlBtn:
+        ui.TLP_1022.ShowPopup('Lighting Control')
+    elif button == ui.closeLightingControlPopupBtn:
+        ui.TLP_1022.HidePopup('Lighting Control')
+
+
+@event(ui.helpPopupBtns, 'Pressed')
+def helpPopupBtnEvent(button, state):
+    if button == ui.helpBtn:
+        ui.TLP_1022.ShowPopup('Help')
+    elif button == ui.closeHelpPopupBtn:
+        ui.TLP_1022.HidePopup('Help')
+
+
+@event(ui.screenControlPopupBtns, 'Pressed')
+def screenControlPopupBtnEvent(button, state):
+    if button == ui.screenControlBtn:
+        ui.TLP_1022.ShowPopup('Screen Control')
+    elif button == ui.closeScreenControlPopupBtn:
+        ui.TLP_1022.HidePopup('Screen Control')
 
 
 ## source selection
 @event(ui.sourceList, 'Pressed')
 def sourceSelectedEvent(button, state):
     pass
-    
  
+
 ##device control
 
 #display
 @event(ui.displayOnBtn, 'Pressed')
 def displayOnBtnEvent(button, state):
     powerOnDisplay()
-    
-    
+
+
 @event(ui.displayOffBtn, 'Pressed')
 def displayOffBtnEvent(button, state):
     powerOffDisplay()
-    
-    
+
+
 @event(ui.displayMuteBtn, 'Pressed')
 def displayMuteBtnEvent(button, state):
-    pass
+
+    ui.videoIsMuted = not ui.videoIsMuted
+    if ui.videoIsMuted:
+        ui.displayMuteBtn.SetState(1)
+        devices.ProjectorSerialPort.Send('VMUTE ON\r')
+    else:
+        ui.displayMuteBtn.SetState(0)
+        devices.ProjectorSerialPort.Send('VMUTE OFF\r')
 
 
 @event(devices.ProjectorSerialPort, 'ReceiveData')
 def MainFeedbackHandler(interface, rcvString):
-    
+
     rxBuffer = rcvString.decode()
     print(rxBuffer)
 
