@@ -126,12 +126,20 @@ sourceList = [
 
 sourcesGroup = MESet(sourceList)
 
-sourcesMap = {
+sourcePageFlipMap = {
     sourceLaptopBtn: 'Laptop',
     sourcePCBtn: 'PC',
     sourceBlurayBtn: 'Blu-ray',
     sourceSmdBtn: 'SMD 202',
     sourceAuxBtn: 'AUX'
+}
+
+sourceCmdMap = {
+    sourceLaptopBtn: '1!',
+    sourcePCBtn: '2!,
+    sourceBlurayBtn: '3!',
+    sourceSmdBtn: '4!',
+    sourceAuxBtn: '5!'
 }
 
 ##device btns
@@ -146,6 +154,14 @@ displayBtns = [
 displayGroup = MESet(displayBtns)
 
 videoIsMuted = False
+
+screenBtns = [
+    screenUpBtn,
+    screenDownBtn,
+    screenStopBtn
+]
+
+screenGroup = MESet(screenBtns)
 
 #bluray btns
 blurayBtns = [
@@ -222,6 +238,8 @@ smd202CmdMap = {
     smdStopBtn: 'wO1PLYR\r'
 }
 
+smdPlaybackFb = MESet([smdPlayBtn, smdPauseBtn, smdStopBtn])
+
 ##volume btns
 
 #afv btns
@@ -244,6 +262,10 @@ mic2Btns = [
     mic2VolDownBtn,
     mic2VolMuteBtn
 ]
+
+afvIsMuted = False
+mic1IsMuted = False
+mic2IsMuted = False
 
 ## End Device/User Interface Definition ----------------------------------------
 ##

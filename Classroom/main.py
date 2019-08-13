@@ -24,8 +24,8 @@ import devices
 
 def Initialize():
     
-    ui.logoText.SetText('Classroom Example')
-    ui.roomText.SetText('Classroom')
+    ui.logoText.SetText('Conference Room')
+    ui.roomText.SetText('Room 1025')
     ui.TLP_1022.ShowPage('Start')
     
     @Wait(15)
@@ -82,19 +82,47 @@ def confirmShutdown():
     
     
 def volumeUp(btn, level, device, lvlRange, cmd):
-    pass
+    btn.SetState(1)
+    device.Send(cmd)
+    level.SetRange(lvlRange[0],lvlRange[1],lvlRange[2])
+    level.Inc()
+    btn.SetState(0)
     
     
 def volumeDown(btn, level, device, lvlRange, cmd):
-    pass
+    btn.SetState(1)
+    device.Send(cmd)
+    level.SetRange(lvlRange[0],lvlRange[1],lvlRange[2])
+    level.Dec()
+    btn.SetState(0)
     
     
 def volumeMute(btn, device, cmd):
-    pass
     
+    devices.DMP44SerialPort.Send('WM30100*1AU\r')
+    @Wait(0.5)
+    def GetMuteStatus():
+        muteState = devices.DMP44SerialPort.SendAndWait('WM30100AU\r', 1)
+        print(muteState)
+        if muteState:
+            muteState = muteState.decode()
+        if 'DsM30100*1' in muteState:
+            ui.afvIsMuted = True
+            ui.afvVolMuteBtn.SetState(1)
+
 
 def volumeUnmute(btn, device, cmd):
-    pass
+    
+    devices.DMP44SerialPort.Send('WM30100*0AU\r')
+    @Wait(0.5)
+    def GetUmuteStatus():
+        muteState = devices.DMP44SerialPort.SendAndWait('WM30100AU\r', 1)
+        print(muteState)
+        if muteState:
+            muteState = muteState.decode()
+        if 'DsM30100*0' in muteState:
+            ui.afvIsMuted = False
+            ui.afvVolMuteBtn.SetState(0)
     
 ## Event Definitions -----------------------------------------------------------
 
@@ -124,7 +152,7 @@ def closeShutdownPopupEvent(button, state):
 @event(ui.startLightingControlPopupBtns, 'Pressed')
 def startLightingControlPopupBtnEvent(button, state):
     if button == ui.splashLightingControlBtn:
-        ui.TLP_1022.ShowPopup('Start Lighting Control')
+        ui.TLP_1022.ShowPopup('Start Lighting Control', 20)
     elif button == ui.closeLightingControlStartPopupBtn:
         ui.TLP_1022.HidePopup('Start Lighting Control')
 
@@ -132,7 +160,7 @@ def startLightingControlPopupBtnEvent(button, state):
 @event(ui.startAudioControlPopupBtns, 'Pressed')
 def startAudioControlPopupBtnEvent(button, state):
     if button == ui.splashAudioControlBtn:
-        ui.TLP_1022.ShowPopup('Start Audio Control')
+        ui.TLP_1022.ShowPopup('Start Audio Control', 20)
     elif button == ui.closeStartAudioControlPopupBtn:
         ui.TLP_1022.HidePopup('Start Audio Control')
 
@@ -172,9 +200,29 @@ def screenControlPopupBtnEvent(button, state):
 ## source selection
 @event(ui.sourceList, 'Pressed')
 def sourceSelectedEvent(button, state):
-    pass
+    devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
+    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
  
+@event(devices.MPS602SerialPort, 'ReceiveData')
+def MPS602SerialPortFeedbackHandler(interface, rcvString):
 
+    rxBuffer = rcvString.decode()
+    print(rxBuffer)
+    if rxBuffer:
+        rxBuffer = rxBuffer.decode()
+        
+        if 'In1 All' in rxBuffer:
+            sourcesGroup.SetCurrent(sourceLaptopBtn)
+        
+        sourceFbMap = {
+    'In1 All\r' : sourceLaptopBtn,
+    'In2 All\r' : sourcePCBtn,
+    'In3 All\r' : sourceBlurayBtn,
+    'In4 All\r' : sourceSmdBtn,
+    'In5 All\r' : sourceAuxBtn
+}
+    
+    
 ##device control
 
 #display
@@ -201,18 +249,81 @@ def displayMuteBtnEvent(button, state):
 
 
 @event(devices.ProjectorSerialPort, 'ReceiveData')
-def MainFeedbackHandler(interface, rcvString):
+def ProjectorSerialPortFeedbackHandler(interface, rcvString):
 
     rxBuffer = rcvString.decode()
     print(rxBuffer)
 
+
 #screen
+@event(ui.screenBtns, 'Pressed')
+def screenBtnEvent(button, state):
+    ui.screenGroup.SetCurrent(button)
+    if button == ui.screenUpBtn:
+        screenUp()
+    elif button == ui.screenDownBtn:
+        screenDown()
+    elif button == ui.screenStopBtn:
+        devices.ScreenDownRelay.SetState('Close')
+        devices.ScreenUpRelay.SetState('Close')
+        print("Relay 1 (Up) State: {0}", devices.ScreenUpRelay.State)
+        print("Relay 2 (Down) State: {0}", devices.ScreenDownRelay.State)
+
 
 #bluray
+@event(ui.blurayBtns, 'Pressed')
+def blurayBtnEvent(button, state):
+    button.SetState(1)
+    devices.BlurayIRPort.PlayContinuous(ui.blurayCmdMap[button])
+    button.SetState(0)
+
 
 #smd
+@event(ui.smd202Btns, 'Pressed')
+def smd202BtnEvent(button, state):
+    devices.SMD202EthernetClient.Send(ui.smd202CmdMap[button])
+    @Wait(0.5)
+    def pollSMDPlaybackStatus():
+        devices.SMD202EthernetClient.Send('WY1PLYR\r')
 
+@event(devices.SMD202EthernetClient, 'ReceiveData')
+def MainFeedbackHandler(interface, rcvString):
+
+    rxBuffer = rcvString.decode()
+    print(rxBuffer)
+    if 'PlyrY1*0' in rxBuffer: #stop
+        ui.smdPlaybackFb.SetCurrent(ui.smdStopBtn)
+    elif 'PlyrY1*1' in rxBuffer: #play
+        ui.smdPlaybackFb.SetCurrent(ui.smdPlayBtn)
+    elif 'PlyrY1*2' in rxBuffer: #pause
+        ui.smdPlaybackFb.SetCurrent(ui.smdPauseBtn)
+    elif 'In1All' in rxBuffer:
+        ui.smdHDMIBtn.SetState(0)
+        ui.smdDecoderBtn.SetState(1)
+    elif 'In2All' in rxBuffer:
+        ui.smdDecoderBtn.SetState(0)
+        ui.smdHDMIBtn.SetState(1)
+    
+    
 ##audio control
+@event(ui.afvBtns, 'Pressed')
+def afvBtnEvent(button, state):
+    
+    if button == ui.afvVolUpBtn:
+        volumeUp(button, ui.afvLevel, devices.DMP44SerialPort, [-1000,0,100], cmd)
+    elif button == ui.afvVolDownBtn:
+        volumeDown(button, ui.afvLevel, devices.DMP44SerialPort, [-1000,0,100], cmd)
+    elif button == ui.afvVolMuteBtn:
+        if not ui.afvIsMuted:
+            volumeMute(button, devices.DMP44SerialPort, 'WM30100*1AU\r')
+        else:
+            volumeUnmute(button, devices.DMP44SerialPort, 'WM30100*0AU\r')
+
+
+#mic 1
+
+#mic 2
+    
     
 ## End Events Definitions-------------------------------------------------------
 
