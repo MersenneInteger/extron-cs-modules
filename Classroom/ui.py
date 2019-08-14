@@ -24,6 +24,9 @@ startBtn = Button(TLP_1022, 8000)
 systemOffBtn = Button(TLP_1022, 8022)
 confirmShutdownBtn = Button(TLP_1022, 9028)
 closeShutdownPopupBtn = Button(TLP_1022, 9029)
+
+autoShutdownWait = None
+
 logoText = Label(TLP_1022, 7001)
 roomText = Label(TLP_1022, 10000)
 
@@ -99,13 +102,13 @@ smdTimeText = Label(TLP_1022, 6)
 smdPlayerStateText = Label(TLP_1022, 8)
 
 afvVolMuteBtn = Button(TLP_1022, 8021)
-afvVolUpBtn = Button(TLP_1022, 8120)
-afvVolDownBtn = Button(TLP_1022, 8121)
-mic1VolUpBtn = Button(TLP_1022, 9015)
-mic1VolDownBtn = Button(TLP_1022, 9016)
+afvVolUpBtn = Button(TLP_1022, 8120, repeatTime = 1)
+afvVolDownBtn = Button(TLP_1022, 8121, repeatTime = 1)
+mic1VolUpBtn = Button(TLP_1022, 9015, repeatTime = 1)
+mic1VolDownBtn = Button(TLP_1022, 9016, repeatTime = 1)
 mic1VolMuteBtn = Button(TLP_1022, 9017)
-mic2VolUpBtn = Button(TLP_1022, 9019)
-mic2VolDownBtn = Button(TLP_1022, 9020)
+mic2VolUpBtn = Button(TLP_1022, 9019, repeatTime = 1)
+mic2VolDownBtn = Button(TLP_1022, 9020, repeatTime = 1)
 mic2VolMuteBtn = Button(TLP_1022, 9021)
 afvLevel = Level(TLP_1022, 8023)
 mic1Level = Level(TLP_1022, 9018)
@@ -113,6 +116,7 @@ mic2Level = Level(TLP_1022, 9022)
 
 #button events
 buttonEventList = ['Pressed', 'Released', 'Held', 'Repeated', 'Tapped']
+connectionEvents = ['Connected', 'Disconnected']
 
 ##btn lists and dictionaries
 #sources
@@ -136,7 +140,7 @@ sourcePageFlipMap = {
 
 sourceCmdMap = {
     sourceLaptopBtn: '1!',
-    sourcePCBtn: '2!,
+    sourcePCBtn: '2!',
     sourceBlurayBtn: '3!',
     sourceSmdBtn: '4!',
     sourceAuxBtn: '5!'
