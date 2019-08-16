@@ -225,6 +225,8 @@ lightingCmdMap = {
     lightingPreset4Btn: 'PRST04\r'
 }
 
+lightingGroup = MESet(lightingBtns)
+
 #SMD202 btns
 smd202Btns = [
     smdPlayBtn,

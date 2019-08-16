@@ -59,6 +59,10 @@ def connectSMD202():
     print(connectionStatus)
     if connectionStatus == 'Connected':
         print('SMD202 connected')
+        def pollSMDPlayState():
+            devices.SMD202EthernetClient.Send('WK1PLYR\r')
+            Wait(0.5, pollSMDPlayState)
+        pollSMDPlayState()
     else:
         print('SMD202 connection failed...retrying')
         Wait(30, connectSMD202)
@@ -68,29 +72,32 @@ def confirmShutdown():
     
     print('shutting down...')
     ui.TLP_1022.HideAllPopups()
-    ui.TLP_1022.ShowPopup('Shutting Down', 5)
+    ui.TLP_1022.ShowPopup('Shutting Down', 20)
     ui.TLP_1022.ShowPage('Start')
     powerOffDisplay()
     screenUp()
+    ui.lightingGroup.SetCurrent(None)
+    ui.sourcesGroup.SetCurrent(None)
+    devices.MPS602SerialPort.Send('0*!')
     
     
 def volumeUp(btn, level, device, lvlRange, cmd):
     
     btn.SetState(1)
-    device.Send(cmd)
     level.SetRange(lvlRange[0],lvlRange[1],lvlRange[2])
     level.Inc()
+    device.Send(cmd + '{0}AU\r'.format(level.Level))
     btn.SetState(0)
-    
+
     
 def volumeDown(btn, level, device, lvlRange, cmd):
     
     btn.SetState(1)
-    device.Send(cmd)
     level.SetRange(lvlRange[0],lvlRange[1],lvlRange[2])
     level.Dec()
+    device.Send(cmd + '{0}AU\r'.format(level.Level))
     btn.SetState(0)
-    
+
     
 def volumeMute(btn, device, cmd):
     
@@ -261,33 +268,34 @@ def screenControlPopupBtnEvent(button, state):
 
 
 ## source selection
-@event(ui.sourceList, 'Pressed')
-def sourceSelectedEvent(button, state):
-    
-    devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
-    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
-
-
-@event(devices.MPS602SerialPort, 'ReceiveData')
-def MPS602SerialPortFeedbackHandler(interface, rcvString):
-
-    rxBuffer = rcvString.decode()
-    print(rxBuffer)
-    if rxBuffer:
-        rxBuffer = rxBuffer.decode()
-        
-        if 'In1 All' in rxBuffer:
-            ui.sourcesGroup.SetCurrent(ui.sourceLaptopBtn)
-        elif 'In2 All' in rxBuffer:
-            ui.sourcesGroup.SetCurrent(ui.sourcePCBtn)
-        elif 'In3 All' in rxBuffer:
-            ui.sourcesGroup.SetCurrent(ui.sourceBlurayBtn)
-        elif 'In4 All' in rxBuffer:
-            ui.sourcesGroup.SetCurrent(ui.sourceSmdBtn)
-        elif 'In5 All' in rxBuffer:
-            ui.sourcesGroup.SetCurrent(ui.sourceAuxBtn)
-
-
+#@event(ui.sourceList, 'Pressed')
+#def sourceSelectedEvent(button, state):
+    #
+    #devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
+    #ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
+    #powerOnDisplay()
+#
+#
+#@event(devices.MPS602SerialPort, 'ReceiveData')
+#def MPS602SerialPortFeedbackHandler(interface, rcvString):
+#
+    #rxBuffer = rcvString.decode()
+    #print(rxBuffer)
+    #if rxBuffer:
+        #rxBuffer = rxBuffer.decode()
+        #
+        #if 'In1 All' in rxBuffer:
+            #ui.sourcesGroup.SetCurrent(ui.sourceLaptopBtn)
+        #elif 'In2 All' in rxBuffer:
+            #ui.sourcesGroup.SetCurrent(ui.sourcePCBtn)
+        #elif 'In3 All' in rxBuffer:
+            #ui.sourcesGroup.SetCurrent(ui.sourceBlurayBtn)
+        #elif 'In4 All' in rxBuffer:
+            #ui.sourcesGroup.SetCurrent(ui.sourceSmdBtn)
+        #elif 'In5 All' in rxBuffer:
+            #ui.sourcesGroup.SetCurrent(ui.sourceAuxBtn)
+#
+#
 ##device control
 
 #display
@@ -346,15 +354,19 @@ def blurayBtnEvent(button, state):
     devices.BlurayIRPort.PlayContinuous(ui.blurayCmdMap[button])
     button.SetState(0)
 
+#lighting
+@event(ui.lightingBtns, 'Pressed')
+def lightingBtnEvent(button, state):
+    
+    #devices.LightingIRPort.Send(ui.lightingCmdMap[button])
+    ui.lightingGroup.SetCurrent(button)
+
 
 #smd
 @event(ui.smd202Btns, 'Pressed')
 def smd202BtnEvent(button, state):
     
     devices.SMD202EthernetClient.Send(ui.smd202CmdMap[button])
-    @Wait(0.5)
-    def pollSMDPlaybackStatus():
-        devices.SMD202EthernetClient.Send('WY1PLYR\r')
 
 
 @event(devices.SMD202EthernetClient, 'ReceiveData')
@@ -362,12 +374,18 @@ def MainFeedbackHandler(interface, rcvString):
 
     rxBuffer = rcvString.decode()
     print(rxBuffer)
-    if 'PlyrY1*0' in rxBuffer: #stop
+    
+    if 'PlyrK1*' in rxBuffer: #timecode
+        ui.smdTimeText.SetText(rxBuffer[len('PlyrK1*'):])
+    elif 'PlyrY1*0' in rxBuffer: #stop
         ui.smdPlaybackFb.SetCurrent(ui.smdStopBtn)
+        ui.smdPlayerStateText.SetText('Stopped')
     elif 'PlyrY1*1' in rxBuffer: #play
         ui.smdPlaybackFb.SetCurrent(ui.smdPlayBtn)
+        ui.smdPlayerStateText('Playing')
     elif 'PlyrY1*2' in rxBuffer: #pause
         ui.smdPlaybackFb.SetCurrent(ui.smdPauseBtn)
+        ui.smdPlayerStateText('Paused')
     elif 'In1All' in rxBuffer:
         ui.smdHDMIBtn.SetState(0)
         ui.smdDecoderBtn.SetState(1)
@@ -388,13 +406,23 @@ def connectionEvent(interface, state):
     
 
 ##audio control
-@event(ui.afvBtns, 'Pressed')
+@event(ui.afvBtns, ui.buttonEventList)
 def afvBtnEvent(button, state):
     
     if button == ui.afvVolUpBtn:
-        volumeUp(button, ui.afvLevel, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeUp(button, ui.afvLevel, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WG30100*')
+        elif state == 'Repeated':
+            volumeUp(button, ui.afvLevel, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WG30100*')
     elif button == ui.afvVolDownBtn:
-        volumeDown(button, ui.afvLevel, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeDown(button, ui.afvLevel, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WG30100*')
+        elif state == 'Repeated':
+            volumeDown(button, ui.afvLevel, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WG30100*')
     elif button == ui.afvVolMuteBtn:
         if not ui.afvIsMuted:
             volumeMute(button, devices.DMP44SerialPort, 'WM30100*1AU\r')
@@ -403,13 +431,23 @@ def afvBtnEvent(button, state):
 
 
 #mic 1
-@event(ui.mic1Btns, 'Pressed')
+@event(ui.mic1Btns, ui.buttonEventList)
 def mic1BtnEvent(button, state):
     
     if button == ui.mic1VolUpBtn:
-        volumeUp(button, ui.mic1Level, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeUp(button, ui.mic1Level, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WM30101*')
+        elif state == 'Repeated':
+            volumeUp(button, ui.mic1Level, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WM30101*')
     elif button == ui.mic1VolDownBtn:
-        volumeDown(button, ui.mic1Level, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeDown(button, ui.mic1Level, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WM30101*')
+        elif state == 'Repeated':
+            volumeDown(button, ui.mic1Level, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WM30101*')
     elif button == ui.mic1VolMuteBtn:
         if not ui.mic1IsMuted:
             volumeMute(button, devices.DMP44SerialPort, 'WM30101*1AU\r')
@@ -418,13 +456,23 @@ def mic1BtnEvent(button, state):
 
 
 #mic 2
-@event(ui.mic2Btns, 'Pressed')
+@event(ui.mic2Btns, ui.buttonEventList)
 def mic2BtnEvent(button, state):
     
     if button == ui.mic2VolUpBtn:
-        volumeUp(button, ui.mic2Level, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeUp(button, ui.mic2Level, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WM30102*')
+        elif state == 'Repeated':    
+            volumeUp(button, ui.mic2Level, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WM30102*')
     elif button == ui.mic2VolDownBtn:
-        volumeDown(button, ui.mic2Level, devices.DMP44SerialPort, [-1000,0,100], '')
+        if state == 'Pressed':
+            volumeDown(button, ui.mic2Level, 
+                devices.DMP44SerialPort, [-1000,0,50], 'WM30102*')
+        elif state == 'Repeated':    
+            volumeUp(button, ui.mic2Level, 
+                devices.DMP44SerialPort, [-1000,0,100], 'WM30102*')
     elif button == ui.mic2VolMuteBtn:
         if not ui.mic2IsMuted:
             volumeMute(button, devices.DMP44SerialPort, 'WM30102*1AU\r')
