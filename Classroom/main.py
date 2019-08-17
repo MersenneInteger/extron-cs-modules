@@ -4,6 +4,7 @@ from extronlib.device import eBUSDevice, ProcessorDevice, UIDevice
 from extronlib.interface import *
 from extronlib.ui import Button, Knob, Label, Level, Slider
 from extronlib.system import Clock, MESet, Timer, Wait
+import datetime
 
 print(Version())
 ## End ControlScript Import ----------------------------------------------------
@@ -28,8 +29,22 @@ def Initialize():
     ui.roomText.SetText('Room 1025')
     ui.TLP_1022.ShowPage('Start')
     #connectSMD202()
+        
+    ui.TLP_1022.SetWakeOnMotion('On')
+    ui.afvLevel.SetRange(-1000, 0, 50)
+    ui.mic1Level.SetRange(-1000, 0, 50)
+    ui.mic2Level.SetRange(-1000, 0, 50)
+    ui.afvLevel.SetLevel(-500)
+    ui.mic1Level.SetLevel(-500)
+    ui.mic2Level.SetLevel(-500)
+    devices.DMP44SerialPort.Send('WG30100*-500AU\r')
     
-    @Wait(10)
+    @Wait(0.5)
+    def paceCommands():
+        devices.DMP44SerialPort.Send('WG30101*-500AU\r')
+        devices.DMP44SerialPort.Send('WG30102*-500AU\r')
+        
+    @Wait(5)
     def PrintHardwareInfo():
         print('{0}\n{1}\n{2}\n{3}'.format(
             devices.IPCP_555_Pro.DeviceAlias,
@@ -42,8 +57,7 @@ def Initialize():
             ui.TLP_1022.FirmwareVersion,
             ui.TLP_1022.Hostname,
             ui.TLP_1022.IPAddress))
-        
-    ui.TLP_1022.SetWakeOnMotion('On')
+            
     print('initialized...')
     
    
@@ -181,9 +195,17 @@ def screenDown():
         devices.ScreenDownRelay.SetState('Open')
  
 def autoShutdown():
-    pass
     
+    date = datetime.datetime.now()
+    hour = date.strftime('%H')
+    minute = date.strftime('%M')
     
+    if hour == '22' and minute == '28':
+        print('autoshutdown at {0}:{1}'.format(hour, minute))
+        confirmShutdown()
+    Wait(30, autoShutdown)
+
+
 ## Event Definitions -----------------------------------------------------------
 
 ##page flips
@@ -193,6 +215,8 @@ def startBtnEvent(button, state):
     ui.TLP_1022.HideAllPopups()
     ui.TLP_1022.ShowPopup('Starting Up', 5)
     ui.TLP_1022.ShowPage('Main')
+    #devices.MPS602SerialPort.Send(ui.sourceCmdMap[sourceLaptopBtn])
+    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[sourceLaptopBtn])
 
 
 @event(ui.systemOffBtn, 'Pressed')
@@ -268,14 +292,14 @@ def screenControlPopupBtnEvent(button, state):
 
 
 ## source selection
-#@event(ui.sourceList, 'Pressed')
-#def sourceSelectedEvent(button, state):
-    #
+@event(ui.sourceList, 'Pressed')
+def sourceSelectedEvent(button, state):
+    
     #devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
-    #ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
-    #powerOnDisplay()
-#
-#
+    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
+    powerOnDisplay()
+
+
 #@event(devices.MPS602SerialPort, 'ReceiveData')
 #def MPS602SerialPortFeedbackHandler(interface, rcvString):
 #
@@ -294,8 +318,8 @@ def screenControlPopupBtnEvent(button, state):
             #ui.sourcesGroup.SetCurrent(ui.sourceSmdBtn)
         #elif 'In5 All' in rxBuffer:
             #ui.sourcesGroup.SetCurrent(ui.sourceAuxBtn)
-#
-#
+
+
 ##device control
 
 #display
@@ -392,7 +416,7 @@ def MainFeedbackHandler(interface, rcvString):
     elif 'In2All' in rxBuffer:
         ui.smdDecoderBtn.SetState(0)
         ui.smdHDMIBtn.SetState(1)
-    
+
 
 @event(devices.SMD202EthernetClient, ui.connectionEvents)
 def connectionEvent(interface, state):
@@ -471,7 +495,7 @@ def mic2BtnEvent(button, state):
             volumeDown(button, ui.mic2Level, 
                 devices.DMP44SerialPort, [-1000,0,50], 'WM30102*')
         elif state == 'Repeated':    
-            volumeUp(button, ui.mic2Level, 
+            volumeDown(button, ui.mic2Level, 
                 devices.DMP44SerialPort, [-1000,0,100], 'WM30102*')
     elif button == ui.mic2VolMuteBtn:
         if not ui.mic2IsMuted:
@@ -479,6 +503,9 @@ def mic2BtnEvent(button, state):
         else:
             volumeUnmute(button, devices.DMP44SerialPort, 'WM30102*0AU\r')
 
+
+#start autoshutdown timer
+autoShutdown()
 
 ## End Events Definitions-------------------------------------------------------
 
