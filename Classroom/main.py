@@ -28,7 +28,7 @@ def Initialize():
     ui.logoText.SetText('Conference Room')
     ui.roomText.SetText('Room 1025')
     ui.TLP_1022.ShowPage('Start')
-    #connectSMD202()
+    connectSMD202()
         
     ui.TLP_1022.SetWakeOnMotion('On')
     ui.afvLevel.SetRange(-1000, 0, 50)
@@ -215,7 +215,7 @@ def startBtnEvent(button, state):
     ui.TLP_1022.HideAllPopups()
     ui.TLP_1022.ShowPopup('Starting Up', 5)
     ui.TLP_1022.ShowPage('Main')
-    #devices.MPS602SerialPort.Send(ui.sourceCmdMap[sourceLaptopBtn])
+    devices.MPS602SerialPort.Send(ui.sourceCmdMap[sourceLaptopBtn])
     ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[sourceLaptopBtn])
 
 
@@ -295,29 +295,29 @@ def screenControlPopupBtnEvent(button, state):
 @event(ui.sourceList, 'Pressed')
 def sourceSelectedEvent(button, state):
     
-    #devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
+    devices.MPS602SerialPort.Send(ui.sourceCmdMap[button])
     ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[button])
     powerOnDisplay()
 
 
-#@event(devices.MPS602SerialPort, 'ReceiveData')
-#def MPS602SerialPortFeedbackHandler(interface, rcvString):
-#
-    #rxBuffer = rcvString.decode()
-    #print(rxBuffer)
-    #if rxBuffer:
-        #rxBuffer = rxBuffer.decode()
-        #
-        #if 'In1 All' in rxBuffer:
-            #ui.sourcesGroup.SetCurrent(ui.sourceLaptopBtn)
-        #elif 'In2 All' in rxBuffer:
-            #ui.sourcesGroup.SetCurrent(ui.sourcePCBtn)
-        #elif 'In3 All' in rxBuffer:
-            #ui.sourcesGroup.SetCurrent(ui.sourceBlurayBtn)
-        #elif 'In4 All' in rxBuffer:
-            #ui.sourcesGroup.SetCurrent(ui.sourceSmdBtn)
-        #elif 'In5 All' in rxBuffer:
-            #ui.sourcesGroup.SetCurrent(ui.sourceAuxBtn)
+@event(devices.MPS602SerialPort, 'ReceiveData')
+def MPS602SerialPortFeedbackHandler(interface, rcvString):
+
+    rxBuffer = rcvString.decode()
+    print(rxBuffer)
+    if rxBuffer:
+        rxBuffer = rxBuffer.decode()
+        
+        if 'In1 All' in rxBuffer:
+            ui.sourcesGroup.SetCurrent(ui.sourceLaptopBtn)
+        elif 'In2 All' in rxBuffer:
+            ui.sourcesGroup.SetCurrent(ui.sourcePCBtn)
+        elif 'In3 All' in rxBuffer:
+            ui.sourcesGroup.SetCurrent(ui.sourceBlurayBtn)
+        elif 'In4 All' in rxBuffer:
+            ui.sourcesGroup.SetCurrent(ui.sourceSmdBtn)
+        elif 'In5 All' in rxBuffer:
+            ui.sourcesGroup.SetCurrent(ui.sourceAuxBtn)
 
 
 ##device control
