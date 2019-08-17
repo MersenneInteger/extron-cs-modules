@@ -194,6 +194,7 @@ def screenDown():
     def screenUpOpenRelayWait():
         devices.ScreenDownRelay.SetState('Open')
  
+
 def autoShutdown():
     
     date = datetime.datetime.now()
@@ -382,7 +383,7 @@ def blurayBtnEvent(button, state):
 @event(ui.lightingBtns, 'Pressed')
 def lightingBtnEvent(button, state):
     
-    #devices.LightingIRPort.Send(ui.lightingCmdMap[button])
+    devices.LightingIRPort.Send(ui.lightingCmdMap[button])
     ui.lightingGroup.SetCurrent(button)
 
 
