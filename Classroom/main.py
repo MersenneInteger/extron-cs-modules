@@ -216,8 +216,8 @@ def startBtnEvent(button, state):
     ui.TLP_1022.HideAllPopups()
     ui.TLP_1022.ShowPopup('Starting Up', 5)
     ui.TLP_1022.ShowPage('Main')
-    devices.MPS602SerialPort.Send(ui.sourceCmdMap[sourceLaptopBtn])
-    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[sourceLaptopBtn])
+    devices.MPS602SerialPort.Send(ui.sourceCmdMap[ui.sourceLaptopBtn])
+    ui.TLP_1022.ShowPopup(ui.sourcePageFlipMap[ui.sourceLaptopBtn])
 
 
 @event(ui.systemOffBtn, 'Pressed')
