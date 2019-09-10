@@ -12,8 +12,8 @@ from extronlib.system import Clock, MESet, Timer, Wait
 '''
 
 class Keyboard:
-    
-    def __init__(self, button_list, keyboard_label):
+
+    def __init__(self, button_list, keyboard_label, shift_btn=None, caps_lock_btn=None):
         
         self._keyboard_text = ''
         self._keyboard_label = keyboard_label
@@ -21,31 +21,48 @@ class Keyboard:
         keys = 'abcdefghijklmnopqrstuvwxyz0123456789-.*@#'
         self._key_map = dict(zip(button_list, keys))
         self._is_caps_locked = False
-    
-    
-    def key_entered():
-        pass
-        
-        
-    def enter():
-        pass
+        self._is_shift_on = False
+        self._shift_btn = shift_btn
+        self._caps_lock_btn = caps_lock_btn
+
+
+    def key_entered(button):
+
+        if self._is_caps_locked or self._is_shift_on:
+            self._keyboard_text = upper(self._key_map[button])
+            self._is_shift_on = False
+            if self._shift_btn != None:
+                self._shift_btn.SetState(0)
+        else:
+            self._keyboard_text = self._key_map[button]
+        self._keyboard_label = self._keyboard_text
         
         
     def clear():
-        pass
+    
+        self._keyboard_text = ''
+        self._keyboard_label = self._keyboard_text
         
         
     def backspace():
-        pass
+        
+        if len(self._keyboard_text) > 0:
+            self._keyboard_text = self._keyboard_text[:len(self._keyboard_text)-1]
+            self._keyboard_label = self._keyboard_text
         
         
     def shift():
-        pass
+        
+        self._is_shift_on = True
+        if self._shift_btn != None:
+            self._shift_btn.SetState(1)
         
         
     def caps_lock():
         
         self._is_caps_locked = not self._is_caps_locked
+        if self._caps_lock_btn != None:
+            self._caps_lock_btn.SetState(self._is_caps_locked)
         
     
     
