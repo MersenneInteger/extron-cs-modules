@@ -43,6 +43,7 @@ class Phonebook:
                     csv_reader = csv.DictReader(csv_file)
                     rows = list(csv_reader)
                 if rows != []:
+                    print('len of rows: {0}'.format(len(rows)))
                     self.build_contacts(rows)
             else:
                 ProgramLog('File not found: {0}'.format(file_name))
@@ -60,58 +61,68 @@ class Phonebook:
                     self._last_names[i], 
                     self._phone_nums[i])
             csv_file.write(data_to_write)
-        
-    
+
+
     def add_contact(self, first_name, last_name, phone_number):
         pass
-        
-        
+
+
     def delete_contact(self):
         pass
-        
-        
+
+
     def edit_contact(self):
         pass
-        
-        
+
+
     def search_contact(self, keyword):
         pass
-        
-    
+
+
     def sort_contacts(self):
         pass
+
+
+    def dial_contact(self, contact_selected):
         
-    
-    def dial_contact(self, contact):
-        pass
-        
+        contact = 'contact' + str(contact_selected)
+
+
     def display_contacts(self):
 
         start = (self._current_page - 1) * 10
         end = start + 10
         contacts_on_display = []
-        for i in range(start, end):
-            contact = 'contact' + str(i)
-            contacts_on_display += self._contacts[contact]
-    
-    
+        try:
+            for i in range(start, end):
+                if i+1 > self._num_of_contacts:
+                    break
+                contact = 'contact' + str(i+1)
+                contacts_on_display.append(self._contacts[contact])
+            print(contacts_on_display)
+        except KeyError as e:
+            ProgramLog('KeyError occured displaying contacts: {0}'.format(e))
+        except Exception as e:
+            ProgramLog('Error displaying contacts: {0}'.format(e))
+
+
     def page_up(self):
         
         if self._current_page < self._total_pages:
             self._current_page += 1
             self.display_contacts()
-        
-        
+
+
     def page_down(self):
-        
+
         if self._current_page > 1:
             self._current_page -= 1
             self.display_contacts()
-        
-        
+
+
     def page_top(self):
         
         self._current_page = 1
         self.display_contacts()
-    
-    
+
+
