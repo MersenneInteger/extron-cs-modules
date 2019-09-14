@@ -9,7 +9,7 @@ import csv
 
 class Phonebook:
     
-    def __init__(self, file_name):
+    def __init__(self, file_name, contact_btns):
     
         self._first_names = []
         self._last_names = []
@@ -21,6 +21,8 @@ class Phonebook:
         self.read_file(self._file_name)
         self._current_page = 1
         self._total_pages = self._num_of_contacts // 10 + 1
+        self._contact_btns = contact_btns
+        self._contact_selected = 0
         
     
     def build_contacts(self, contact_info):
@@ -33,8 +35,8 @@ class Phonebook:
             contact = 'contact' + str(i+1)
             self._contacts[contact] = [self._first_names[i], self._last_names[i], self._phone_nums[i]]
             print(self._contacts[contact])
-    
-    
+        
+        
     def read_file(self, file_name):
 
         try:
@@ -83,9 +85,19 @@ class Phonebook:
         pass
 
 
-    def dial_contact(self, contact_selected):
+    def select_contact(self, contact_selected):
         
-        contact = 'contact' + str(contact_selected)
+        self._contact_selected = self._contact_btns.index(contact_selected)+1
+        contact = 'contact'+str(self._contact_selected)
+        map(lambda x: x.SetState(0), self._contact_btns)
+        self._contact_btns[self._contact_selected-1].SetState(1)
+        return self._contacts[contact][0] + ' ' + self._contacts[contact][1]
+
+
+    def dial_contact(self):
+        
+        contact = 'contact' + str(self._contact_selected)
+        return self._contacts[contact]
 
 
     def display_contacts(self):
@@ -99,7 +111,11 @@ class Phonebook:
                     break
                 contact = 'contact' + str(i+1)
                 contacts_on_display.append(self._contacts[contact])
-            print(contacts_on_display)
+                
+            for i in range(len(self._contact_btns)):
+                self._contact_btns[i].SetText(contacts_on_display[i][0] + \
+                    ' ' + contacts_on_display[i][1])    
+                
         except KeyError as e:
             ProgramLog('KeyError occured displaying contacts: {0}'.format(e))
         except Exception as e:
