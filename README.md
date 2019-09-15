@@ -1,1 +1,1 @@
-extron control script practice projects
+extron control script modules and practice projects
