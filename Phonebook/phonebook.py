@@ -66,7 +66,13 @@ class Phonebook:
 
 
     def add_contact(self, first_name, last_name, phone_number):
-        pass
+        
+        self._first_names.append(first_name)
+        self._last_names.append(last_name)
+        self._phone_nums.append(phone_number)
+        self._num_of_contacts += 1
+        contact = 'contact'+ self._num_of_contacts
+        self._contacts[contact] = [first_name, last_name, phone_number]
 
 
     def delete_contact(self):
@@ -88,33 +94,40 @@ class Phonebook:
     def select_contact(self, contact_selected):
         
         self._contact_selected = self._contact_btns.index(contact_selected)+1
-        contact = 'contact'+str(self._contact_selected)
-        map(lambda x: x.SetState(0), self._contact_btns)
+        contact = 'contact' + str(self._contact_selected)
+        for btn in self._contact_btns:
+            btn.SetState(0)
         self._contact_btns[self._contact_selected-1].SetState(1)
         return self._contacts[contact][0] + ' ' + self._contacts[contact][1]
 
 
     def dial_contact(self):
         
-        contact = 'contact' + str(self._contact_selected)
-        return self._contacts[contact]
+        if self._contact_selected > 0:
+            contact = 'contact' + str(self._contact_selected)
+            return self._contacts[contact]
 
 
     def display_contacts(self):
 
-        start = (self._current_page - 1) * 10
-        end = start + 10
+        max_contacts_on_display = 10
+        start = (self._current_page - 1) * max_contacts_on_display
+        end = start + max_contacts_on_display
         contacts_on_display = []
+        
         try:
             for i in range(start, end):
                 if i+1 > self._num_of_contacts:
                     break
                 contact = 'contact' + str(i+1)
                 contacts_on_display.append(self._contacts[contact])
-                
+
             for i in range(len(self._contact_btns)):
-                self._contact_btns[i].SetText(contacts_on_display[i][0] + \
-                    ' ' + contacts_on_display[i][1])    
+                if i < len(contacts_on_display):
+                    self._contact_btns[i].SetText(contacts_on_display[i][0] \
+                        + ' ' + contacts_on_display[i][1])
+                else:
+                    self._contact_btns[i].SetText('')
                 
         except KeyError as e:
             ProgramLog('KeyError occured displaying contacts: {0}'.format(e))
@@ -122,10 +135,18 @@ class Phonebook:
             ProgramLog('Error displaying contacts: {0}'.format(e))
 
 
+    def clear_contacts(self):
+    
+        for btn in self._contact_btns:
+            btn.SetState(0)
+        self._contact_selected = 0
+
+
     def page_up(self):
         
         if self._current_page < self._total_pages:
             self._current_page += 1
+            self.clear_contacts()
             self.display_contacts()
 
 
@@ -133,12 +154,12 @@ class Phonebook:
 
         if self._current_page > 1:
             self._current_page -= 1
+            self.clear_contacts()
             self.display_contacts()
 
 
     def page_top(self):
         
         self._current_page = 1
+        self.clear_contacts()
         self.display_contacts()
-
-
