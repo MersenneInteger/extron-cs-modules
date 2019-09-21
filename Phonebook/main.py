@@ -156,6 +156,7 @@ phonebook = Phonebook('contact_list.csv', contact_btn_list)
 def Initialize():
     
     TP.ShowPage('Page1')
+    selected_contact_label.SetText('')
     
     @Wait(5)
     def init_phonebook_on_startup():
@@ -181,8 +182,8 @@ def Initialize():
                     #def w3():
                         #print('top page\n\n')
                         #phonebook.page_top()
-                        
-                        
+                              
+                              
 def show_loading():
     
     TP.ShowPopup('Loading')
@@ -229,9 +230,45 @@ def kb_space_btn_event(button, state):
 @event(contact_btn_list, 'Pressed')
 def contact_btn_list_event(button, state):
     
-    #global phonebook
     selected_contact_label.SetText(phonebook.select_contact(button))
     
+    
+@event(page_up_btn, 'Pressed')
+def page_up_btn_event(button, state):
+    
+    phonebook.page_up()    
+    
+    
+@event(page_down_btn, 'Pressed')
+def page_down_btn_event(button, state):
+    
+    phonebook.page_down()   
+    
+    
+@event(page_top_btn, 'Pressed')
+def page_top_btn_event(button, state):
+    
+    phonebook.page_top()  
+    
+    
+@event(dial_btn, 'Pressed')
+def dial_btn_event(button, state):
+    
+    phonebook.dial_contact() 
+    
+    
+@event(search_popup_btn, 'Pressed')
+def search_popup_btn_event(button, state):
+    
+    TP.ShowPage('keyboard')   
+    
+    
+@event(close_keyboard_btn, 'Pressed')
+def close_keyboard_btn_event(button, state):
+    
+    TP.ShowPage('Page1')
+
+
 ## End Events Definitions-------------------------------------------------------
 
 Initialize()
