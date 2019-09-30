@@ -146,7 +146,7 @@ selected_contact_label = Label(TP, 15)
 loading_animation = Button(TP, 69)
 
 kb = Keyboard(kb_btn_list, kb_text_label, kb_shift_btn, kb_caps_btn)
-phonebook = Phonebook('contact_list.csv', contact_btn_list)
+phonebook = Phonebook('contact_list.csv', contact_btn_list, selected_contact_label)
 ## End Device/User Interface Definition ----------------------------------------
 ##
 ## Begin Communication Interface Definition ------------------------------------
@@ -155,37 +155,20 @@ phonebook = Phonebook('contact_list.csv', contact_btn_list)
 
 def Initialize():
     
-    TP.ShowPage('Page1')
-    selected_contact_label.SetText('')
-    
-    @Wait(5)
+    @Wait(1)
     def init_phonebook_on_startup():
-        #phonebook = Phonebook('contact_list.csv', contact_btn_list)
         show_loading()
+        TP.ShowPage('Page1')
+        selected_contact_label.SetText('')
         
         @Wait(1)
         def w0():
             print('first 10 contacts: ')
             phonebook.display_contacts()
-            
-            #@Wait(1)
-            #def w1():
-                #print('next page\n\n')
-                #phonebook.page_up()
-                #
-                #@Wait(1)
-                #def w2():
-                    #print('last page\n\n')
-                    #phonebook.page_up()
-                    #
-                    #@Wait(1)
-                    #def w3():
-                        #print('top page\n\n')
-                        #phonebook.page_top()
-                              
-                              
+              
+              
 def show_loading():
-    
+
     TP.ShowPopup('Loading')
     animation_states = [0,1,2,3]
     for i,animatation in enumerate(cycle(animation_states)):
@@ -199,28 +182,28 @@ def show_loading():
 
 @event(kb_btn_list, 'Pressed')
 def kb_btn_listEvent(button, state):
-    
+
     kb.key_entered(button)
 
 
 @event(kb_backspace_btn, 'Pressed')
 def kb_backspace_btn_event(button, state):
-    
+
     kb.backspace()
-    
+
 
 @event(kb_shift_btn, 'Pressed')
 def kb_shift_btn_event(button, state):
-    
+
     kb.shift()
-    
+
 
 @event(kb_caps_btn, 'Pressed')
 def kb_caps_btn_event(button, state):
     
     kb.caps_lock()
-    
-    
+
+
 @event(kb_space_btn, 'Pressed')
 def kb_space_btn_event(button, state):
     
@@ -230,42 +213,43 @@ def kb_space_btn_event(button, state):
 @event(contact_btn_list, 'Pressed')
 def contact_btn_list_event(button, state):
     
-    selected_contact_label.SetText(phonebook.select_contact(button))
-    
-    
+    phonebook.select_contact(button)
+
+
 @event(page_up_btn, 'Pressed')
 def page_up_btn_event(button, state):
     
-    phonebook.page_up()    
-    
-    
+    phonebook.page_up()
+
+
 @event(page_down_btn, 'Pressed')
 def page_down_btn_event(button, state):
     
     phonebook.page_down()   
-    
-    
+
+
 @event(page_top_btn, 'Pressed')
 def page_top_btn_event(button, state):
     
     phonebook.page_top()  
-    
-    
+
+
 @event(dial_btn, 'Pressed')
 def dial_btn_event(button, state):
     
-    phonebook.dial_contact() 
     
-    
+    print(phonebook.dial_contact())
+
+
 @event(search_popup_btn, 'Pressed')
 def search_popup_btn_event(button, state):
     
     TP.ShowPage('keyboard')   
-    
-    
+
+
 @event(close_keyboard_btn, 'Pressed')
 def close_keyboard_btn_event(button, state):
-    
+
     TP.ShowPage('Page1')
 
 
